@@ -1,0 +1,41 @@
+# Draw rectangular shape and extract objects using OpenCV (Colab compatible)
+
+import cv2
+import matplotlib.pyplot as plt
+from google.colab import files
+
+# Upload image
+uploaded = files.upload()
+img_path = list(uploaded.keys())[0]
+
+# Read image
+img = cv2.imread(img_path)
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Define rectangles (x, y, w, h)
+rectangles = [
+    (100, 50, 200, 250),   # Object 1
+    (320, 50, 200, 250)   # Object 2
+]
+
+extracted = []
+
+# Draw rectangles and extract objects
+for (x, y, w, h) in rectangles:
+    cv2.rectangle(img_rgb, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    crop = img_rgb[y:y+h, x:x+w]
+    extracted.append(crop)
+
+# Show image with rectangles
+plt.figure(figsize=(6,4))
+plt.imshow(img_rgb)
+plt.axis("off")
+plt.show()
+
+# Show extracted objects
+for i, obj in enumerate(extracted):
+    plt.figure(figsize=(3,3))
+    plt.imshow(obj)
+    plt.title(f"Extracted Object {i+1}")
+    plt.axis("off")
+    plt.show()
