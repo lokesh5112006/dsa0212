@@ -1,0 +1,63 @@
+# Step 1: Upload video file (vehicles.mp4)
+from google.colab import files
+uploaded = files.upload()
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import clear_output
+
+# Get uploaded video name
+video_path = list(uploaded.keys())[0]
+
+# Open video
+cap = cv2.VideoCapture(video_path)
+
+# Background Subtractor
+bg_subtractor = cv2.createBackgroundSubtractorMOG2(
+    history=500, varThreshold=50, detectShadows=True
+)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    # Resize for faster processing
+    frame = cv2.resize(frame, (800, 450))
+
+    # Apply background subtraction
+    fg_mask = bg_subtractor.apply(frame)
+
+    # Remove noise
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))
+    fg_mask = cv2.morphologyEx(fg_mask, cv2.MORPH_OPEN, kernel)
+
+    # Find contours
+    contours, _ = cv2.findContours(
+        fg_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+
+    vehicle_count = 0
+
+    for cnt in contours:
+        if cv2.contourArea(cnt) > 1000:
+            x, y, w, h = cv2.boundingRect(cnt)
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            vehicle_count += 1
+
+    # Display vehicle count
+    cv2.putText(frame, f"Vehicles: {vehicle_count}", (20, 40),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    # Convert BGR to RGB for matplotlib
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    # Display frame
+    clear_output(wait=True)
+    plt.figure(figsize=(10, 5))
+    plt.imshow(frame_rgb)
+    plt.axis("off")
+    plt.show()
+
+cap.release()
