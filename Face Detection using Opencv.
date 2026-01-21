@@ -1,0 +1,40 @@
+# Face Detection using OpenCV (Google Colab compatible)
+
+import cv2
+import matplotlib.pyplot as plt
+from google.colab import files
+
+# Upload image
+uploaded = files.upload()
+img_path = list(uploaded.keys())[0]
+
+# Load image
+img = cv2.imread(img_path)
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+# Load Haar Cascade face detector
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
+
+# Detect faces
+faces = face_cascade.detectMultiScale(
+    gray,
+    scaleFactor=1.1,
+    minNeighbors=5,
+    minSize=(30, 30)
+)
+
+# Draw rectangles around faces
+for (x, y, w, h) in faces:
+    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)
+
+# Convert to RGB for display
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Display result
+plt.figure(figsize=(6,4))
+plt.imshow(img_rgb)
+plt.title("Face Detection using OpenCV")
+plt.axis("off")
+plt.show()
