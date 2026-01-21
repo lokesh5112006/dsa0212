@@ -1,0 +1,32 @@
+# Play Video in Reverse using OpenCV (Google Colab compatible)
+
+import cv2
+import matplotlib.pyplot as plt
+from google.colab import files
+from IPython.display import clear_output
+
+# Upload video
+uploaded = files.upload()
+video_path = list(uploaded.keys())[0]
+
+# Open video
+cap = cv2.VideoCapture(video_path)
+
+# Read all frames
+frames = []
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+    frames.append(frame)
+
+cap.release()
+
+# Play frames in reverse order
+for frame in reversed(frames):
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    clear_output(wait=True)
+    plt.figure(figsize=(6,4))
+    plt.imshow(frame_rgb)
+    plt.axis("off")
+    plt.show()
